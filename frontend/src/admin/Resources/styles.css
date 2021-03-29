@@ -1,0 +1,4 @@
+.limited-textfield {
+    max-width: 100px;
+    overflow: hidden;
+}

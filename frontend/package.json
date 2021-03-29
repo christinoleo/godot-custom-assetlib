@@ -1,0 +1,61 @@
+{
+  "name": "fastapi-react",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.54",
+    "bibtex-parser-js": "0.0.2",
+    "citation-js": "^0.5.0-alpha.9",
+    "jwt-decode": "^3.0.0",
+    "leaflet": "^1.7.1",
+    "leaflet-lasso": "^2.2.4",
+    "lodash": "^4.17.20",
+    "node-sass": "^4.0.0",
+    "plotly.js": "^1.58.4",
+    "ra-core": "^3.11.4",
+    "ra-data-json-server": "^3.5.2",
+    "ra-data-simple-rest": "^3.3.2",
+    "react": "^17.0.1",
+    "react-admin": "^3.11.4",
+    "react-dom": "^17.0.1",
+    "react-final-form": "^6.5.2",
+    "react-final-form-listeners": "^1.0.2",
+    "react-leaflet": "^3.1.0",
+    "react-leaflet-control": "^2.1.2",
+    "react-plotly.js": "^2.5.1",
+    "react-redux": "^7.2.2",
+    "react-router": "^5.2.0",
+    "react-router-config": "^5.1.1",
+    "react-router-dom": "^5.2.0",
+    "react-router-redux": "^4.0.8",
+    "react-scripts": "4.0.1",
+    "react-truncate": "^2.4.0",
+    "redux-form": "^8.3.7",
+    "standard": "^16.0.3"
+  },
+  "scripts": {
+    "start": "set BROWSER=none && react-scripts start",
+    "build": "set NODE_ENV=production && react-scripts build",
+    "move": "move build\\* ..\\backend\\app\\frontend\\",
+    "test": "CI=true react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "react-test-renderer": "^17.0.1"
+  }
+}
