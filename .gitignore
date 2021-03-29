@@ -1,4 +1,5 @@
-backend/local_storage
+backend/app/frontend/
+!backend/app/frontend/.keep
 local_data/*
 local_data
 
@@ -82,5 +83,4 @@ backup
 !/data/CIW-NovaScotia2019-SurveyDataDictionary.pdf
 !/data/CIW-NovaScotia2019-SurveyDataDictionary.docx
 !/data/lfsa000a16a_e/
-/backend/local_storage/
 /local_data/

@@ -1,52 +1,61 @@
 from fastapi import Depends, APIRouter
 
-from api.v1.auth import auth_router
-from api.v1.nsquality_map import nsquality_map_router
-from core.auth import auth_utils
-from db.crud import pandas_crud_instance
-from db.models import Metadata, NSQuality, nsquality_model_map, metadata_model_map
-
 # Routers
-from fastapi_crud_orm_connector.api.crud_router import configure_crud_router
+from api.asset_crud import asset_router, pandas_asset_crud
+from api.categories_crud import configure_router, pandas_categories_crud
+from api.v1.auth import auth_router
+from core.auth import auth_utils, user_crud
+from fastapi_crud_orm_connector.api.crud_router import configure_crud_router, DefaultAdminRouter
 from fastapi_crud_orm_connector.api.user_router import generate_user_router
-from fastapi_crud_orm_connector.orm.rdb_crud import RDBCrud
-from fastapi_crud_orm_connector.orm.user_crud import rdb_user_crud
-from fastapi_crud_orm_connector.utils.rdb_session import get_rdb
+from fastapi_crud_orm_connector.utils.dict_session import PandasSession
 
 
 def generate_routers(app):
     app.include_router(
-        generate_user_router(APIRouter(), auth_utils, rdb_user_crud()),
+        generate_user_router(APIRouter(), auth_utils, user_crud),
         prefix="/api/v1",
         tags=["users"],
         dependencies=[Depends(auth_utils.get_current_active_user)],
     )
     app.include_router(auth_router, prefix="/api", tags=["auth"])
 
+    # app.include_router(
+    #     asset_router,
+    #     prefix="/api/v1",
+    #     tags=["nsquality"],
+    #     dependencies=[Depends(auth_utils.get_current_active_superuser)],
+    # )
+
     app.include_router(
-        configure_crud_router(APIRouter(), RDBCrud(Metadata, metadata_model_map), "/metadata", get_rdb),
+        configure_router,
+        prefix="/asset-library/api",
+        tags=["godot AssetLib api", "category/configuration api"],
+    )
+
+    app.include_router(
+        asset_router,
+        prefix="/asset-library/api",
+        tags=["godot AssetLib api", "plugin assets api"],
+    )
+
+    app.include_router(
+        configure_crud_router(APIRouter(),
+                              "/categories",
+                              get_db=PandasSession(pandas_categories_crud.db).get_db,
+                              router=DefaultAdminRouter(pandas_categories_crud)
+                              ),
         prefix="/api/v1",
-        tags=["metadata"],
+        tags=["react-admin api", "category/configuration api"],
         dependencies=[Depends(auth_utils.get_current_active_superuser)],
     )
 
     app.include_router(
-        configure_crud_router(APIRouter(), pandas_crud_instance, "/metadata2", get_rdb),
+        configure_crud_router(APIRouter(),
+                              "/assets",
+                              get_db=PandasSession(pandas_asset_crud.db).get_db,
+                              router=DefaultAdminRouter(pandas_asset_crud)
+                              ),
         prefix="/api/v1",
-        tags=["metadata"],
-        dependencies=[Depends(auth_utils.get_current_active_superuser)],
-    )
-
-    app.include_router(
-        configure_crud_router(APIRouter(), RDBCrud(NSQuality, nsquality_model_map), "/nsquality", get_rdb),
-        prefix="/api/v1",
-        tags=["nsquality"],
-        dependencies=[Depends(auth_utils.get_current_active_superuser)],
-    )
-
-    app.include_router(
-        nsquality_map_router,
-        prefix="/api/v1",
-        tags=["nsquality"],
+        tags=["react-admin api", "plugin assets api"],
         dependencies=[Depends(auth_utils.get_current_active_superuser)],
     )

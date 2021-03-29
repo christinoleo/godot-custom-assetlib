@@ -1,0 +1,1 @@
+web: uvicorn main:app --workers 1 --app-dir /app/backend/app --port 8000 --host 0.0.0.0

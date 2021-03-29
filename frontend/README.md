@@ -1,68 +1,24 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Frontend
 
-## Available Scripts
+This is a javascript frontend to display the contents of the Custom Godot Asset Store. In its core, these libraries are in its implementation:
+* React
+* React-Admin
+* Material UI
 
-In the project directory, you can run:
+To start a server, use yarn or npm as such:
+`npm run start` or `yarn run start` and connect to localhost:3000 in your browser.
 
-### `npm start`
+Also start the backend and use the default test user from the [dot.env file](../backend/local_storage/dot.env) to connect to the admin panel, where you'll be able to see all assets and configurations and edit/add them to your heart's content! 
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Auth
+There is an implementation of authentication using JWT token synced by REST to the backend specified at [the configuration file](./src/config/index.jsx). Auth is implemented through [the auth](./src/admin/authProvider.jsx) and connects to FastAPI authentication logic in the backend, storing the tokens in a DataContext in [this file](./src/utils/DataContext.jsx). The tokens are stored in memory throuth the [authProvider](./src/utils/auth.js).
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+By default, a test user can be used to log to the admin panel in when in development mode: `admin` `password`. If you wish to remove this user, see backend documentation.
 
-### `npm test`
+## Connection to the backend
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The code has two implementations to connect to the backend, one for React-Admin and a manual implementation for usage outside React-Admin.
 
-### `npm run build`
+## Production build
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+To build for production, there is no automation as of yet. Run the build command through npm/yarn and copy manually the contents of the build folder into the backend's frontend folder and uncomment at [main.py](../backend/app/main.py) the lines to serve these files from the backend. You can also choose to serve the static build of react from a separate server, such as AWS S3. Its you call.

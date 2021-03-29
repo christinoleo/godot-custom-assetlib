@@ -1,18 +1,38 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
-import { isAuthenticated, logout } from '../utils';
+import { AuthContext, logout } from '../utils';
 import { Route } from 'react-router-dom';
-import { Redirect, useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 
 export const PrivateRoute = ({ children, ...rest }) => {
     const history = useHistory();
-    const auth = isAuthenticated();
-    console.log(auth);
-    if (!auth) {
-        logout();
+    const authContext = useContext(AuthContext);
+    const location = useLocation();
+    if(location.pathname !== rest.path){
+        return <div/>;
+    } else if (!authContext.isAuthenticated()) {
+        logout(authContext);
         history.push('/login');
         return <div/>;
     } else {
-        return <Route render={(props) => React.createElement(children, {auth, ...props})} {...rest}/>;
+        return <Route render={(props) => React.createElement(children, { auth, ...props })} {...rest}/>;
+    }
+};
+
+export const SuperuserPrivateRoute = ({ children, component, ...rest }) => {
+    const history = useHistory();
+    const location = useLocation();
+    const authContext = useContext(AuthContext);
+    if(location.pathname !== rest.path){
+        return <div/>;
+    } else if (!authContext.isAuthenticated()) {
+        logout(authContext);
+        history.push('/login');
+        return <div/>;
+    } else if (!authContext.isAdmin()) {
+        history.push('/forbidden');
+        return <div/>;
+    } else {
+        return <Route render={(props) => React.createElement(component, { ...props })} {...rest}/>;
     }
 };

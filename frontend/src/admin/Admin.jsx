@@ -6,10 +6,8 @@ import PostIcon from '@material-ui/icons/Book';
 
 import {BACKEND_URL} from '../config';
 import {UserCreate, UserEdit, UserList, UserShow} from './Users';
-import {PublicationResource} from "./Resources/Publications";
-import {ProjectResource} from "./Resources/Projects";
-import {AuthorResource} from "./Resources/Authors";
-import {ProjectPublicationResource} from "./Resources/ProjectPublication";
+import {AssetResource} from './Users/Asset';
+import {CategoryResource} from './Users/Category';
 
 const httpClient = (url, options) => {
     if (!options) {
@@ -20,8 +18,12 @@ const httpClient = (url, options) => {
     }
     const token = localStorage.getItem('token');
     options.headers.set('Authorization', `Bearer ${token}`);
-    try {console.log('call', url, JSON.parse(options.body))} catch (e) {}
-    try {return fetchUtils.fetchJson(url, options)} catch (e) {
+    try {
+        console.log('call', url, JSON.parse(options.body));
+    } catch (e) {}
+    try {
+        return fetchUtils.fetchJson(url, options);
+    } catch (e) {
         console.log(e);
         throw e;
     }
@@ -38,7 +40,7 @@ export const Admin = () => {
             create={UserCreate}
             icon={PostIcon}
             show={UserShow}
-        />, PublicationResource(), ProjectResource(), AuthorResource(), ProjectPublicationResource(),
+        />, AssetResource(),CategoryResource(),
     ];
 
     return (

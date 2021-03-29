@@ -1,15 +1,63 @@
 import decodeJwt from 'jwt-decode';
 import { BASE_URL } from '../config';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 export const AUTH_ADMIN = 'admin';
 export const AUTH_USER = 'user';
 
-export const isAuthenticated = () => {
-    const permissions = localStorage.getItem('permissions');
-    if (!permissions || (permissions !== AUTH_ADMIN && permissions !== AUTH_USER)) {
-        return false;
-    }
-    return { token: localStorage.getItem('token'), permissions: permissions };
+export const AuthContext = createContext({});
+
+export const AuthProvider = ({ children }) => {
+    const [permissions, setPermissions] = useState(localStorage.getItem('permissions'));
+    const [token, setToken] = useState(localStorage.getItem('token'));
+
+    const checkUserData = () => {
+        console.log('AUTH CHANGE', permissions,
+            localStorage.getItem('permissions'),
+            localStorage.getItem('token')
+        );
+        if(localStorage.getItem('permissions') !== permissions)
+            setPermissions(localStorage.getItem('permissions'));
+        if(localStorage.getItem('token') !== token)
+            setToken(localStorage.getItem('token'));
+    };
+
+    useEffect(() => {
+        window.addEventListener('storage', checkUserData);
+        return () => window.removeEventListener('storage', checkUserData);
+    }, []);
+
+    // if (!permissions || (permissions !== AUTH_ADMIN && permissions !== AUTH_USER)) {
+    //     return false;
+    // }
+
+    // return { token: localStorage.getItem('token'), permissions: permissions };
+    const isAuthenticated = () => {
+        return (!!permissions && (permissions === AUTH_ADMIN || permissions === AUTH_USER));
+    };
+    const isAdmin = () => {
+        return (!!permissions && permissions === AUTH_ADMIN);
+    };
+    const setLogin = (data) => {
+        setPermissions(data.permissions);
+        setToken(data.token);
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('permissions', data.permissions);
+    };
+    const clearLogin = () => {
+        setPermissions(null);
+        setToken(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('permissions');
+    };
+
+    return (
+        <AuthContext.Provider value={{
+            token, permissions, isAuthenticated, isAdmin, setLogin, clearLogin,
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
 /**
@@ -20,7 +68,7 @@ export const isAuthenticated = () => {
  * @returns JSON data containing access token on success
  * @throws Error on http errors or failed attempts
  */
-export const login = async (email, password) => {
+export const login = async (email, password, authContext) => {
     // Assert email or password is not empty
     if (!(email.length > 0) || !(password.length > 0)) {
         throw new Error('Email or password was not provided');
@@ -52,8 +100,7 @@ export const login = async (email, password) => {
 
     if ('access_token' in data) {
         const decodedToken = decodeJwt(data['access_token']);
-        localStorage.setItem('token', data['access_token']);
-        localStorage.setItem('permissions', decodedToken.permissions);
+        authContext.setLogin({permissions: decodedToken.permissions, token: data['access_token']});
     }
 
     return data;
@@ -71,7 +118,8 @@ export const login = async (email, password) => {
 export const signUp = async (
     email,
     password,
-    passwordConfirmation
+    passwordConfirmation,
+    authContext
 ) => {
     // Assert email or password or password confirmation is not empty
     if (!(email.length > 0)) {
@@ -110,14 +158,12 @@ export const signUp = async (
 
     if ('access_token' in data) {
         const decodedToken = decodeJwt(data['access_token']);
-        localStorage.setItem('token', data['access_token']);
-        localStorage.setItem('permissions', decodedToken.permissions);
+        authContext.setLogin({permissions: decodedToken.permissions, token: data['access_token']});
     }
 
     return data;
 };
 
-export const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('permissions');
+export const logout = (authContext) => {
+    authContext.clearLogin();
 };

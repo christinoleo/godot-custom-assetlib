@@ -1,24 +1,25 @@
-import uvicorn
+from pathlib import Path  # Python 3.6+ only
+
+import uvicorn, os
+from dotenv import load_dotenv
 from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from starlette import status
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import HTMLResponse
+from starlette.responses import JSONResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
-from dotenv import load_dotenv
-
-from pathlib import Path  # Python 3.6+ only
 
 env_path = Path(__file__).parent.parent / 'local_storage' / 'dot.env'
 load_dotenv(dotenv_path=env_path)
 
 from api.v1.base import generate_routers
 from core import config
-from fastapi_crud_orm_connector.utils.rdb_session import SessionLocal
 
 if __name__ == "__main__":
-    # uvicorn.run(app, host="0.0.0.0", port=8888)
-    uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8888)
+    uvicorn.run("main:app", host="0.0.0.0", reload=True, port=80)
 
 app = FastAPI(
     title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api"
@@ -40,28 +41,31 @@ app.add_middleware(
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
-    request.state.db = SessionLocal()
     response = await call_next(request)
-    request.state.db.close()
     response.headers["Access-Control-Expose-Headers"] = '*'
     return response
 
 
-@app.get("/api/v1")
-async def root():
-    return {"message": "Hello World"}
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
+    )
 
 
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-templates = Jinja2Templates(directory="frontend")
+appdirprefix = ''
+if os.getenv('STAGE', 'dev').startswith('prod'):
+    appdirprefix = os.getcwd() + '/app/'
+app.mount("/static", StaticFiles(directory=appdirprefix+'frontend/static'), name="static")
+templates = Jinja2Templates(directory=appdirprefix+'frontend')
 
 
-@app.get("/", response_class=HTMLResponse)
-@app.get("/admin", response_class=HTMLResponse)
-@app.get("/map", response_class=HTMLResponse)
-@app.get("/login", response_class=HTMLResponse)
-@app.get("/logout", response_class=HTMLResponse)
-@app.get("/signup", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse, tags=["static website"])
+@app.get("/admin", response_class=HTMLResponse, tags=["static website"])
+@app.get("/login", response_class=HTMLResponse, tags=["static website"])
+@app.get("/logout", response_class=HTMLResponse, tags=["static website"])
+@app.get("/signup", response_class=HTMLResponse, tags=["static website"])
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 

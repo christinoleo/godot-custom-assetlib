@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {Button, Grid, Paper, TextField} from '@material-ui/core';
 import {makeStyles} from '@material-ui/core/styles';
 import {Face, Fingerprint} from '@material-ui/icons';
@@ -6,7 +6,7 @@ import {Alert} from '@material-ui/lab';
 import {Redirect} from 'react-router-dom';
 import {useHistory} from 'react-router';
 
-import {isAuthenticated, signUp} from '../utils/auth';
+import { AuthContext, signUp } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
     margin: {
@@ -30,6 +30,7 @@ export const SignUp = () => {
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [error, setError] = useState('');
+    const authContext = useContext(AuthContext);
 
     const handleSubmit = async (_) => {
         // Password confirmation validation
@@ -37,7 +38,7 @@ export const SignUp = () => {
         else {
             setError('');
             try {
-                const data = await signUp(email, password, passwordConfirmation);
+                const data = await signUp(email, password, passwordConfirmation, authContext);
 
                 if (data) {
                     history.push('/');
@@ -54,7 +55,7 @@ export const SignUp = () => {
         }
     };
 
-    return !!isAuthenticated() ? (
+    return !!authContext.isAuthenticated() ? (
         <Redirect to="/"/>
     ) : (
         <Paper className={classes.padding}>

@@ -1,14 +1,12 @@
-import React from 'react';
-import {Switch, Route} from 'react-router-dom';
-import {useHistory} from 'react-router';
-import {makeStyles} from '@material-ui/core/styles';
+import React, { useContext } from 'react';
+import { Route, Switch } from 'react-router-dom';
+import { useHistory } from 'react-router';
+import { makeStyles } from '@material-ui/core/styles';
 
-import {Home, Login, SignUp, Protected, PrivateRoute} from './views';
-import {Admin} from './admin';
-import {logout} from './utils';
-import { NSMap } from './views/NSMap';
+import { Home, Login, PrivateRoute, Protected, SignUp, SuperuserPrivateRoute } from './views';
+import { Admin } from './admin';
+import { AuthContext, logout } from './utils';
 import { Forbidden } from './views/Forbidden';
-import { NSDashboard } from './views/NSDashboard';
 
 const useStyles = makeStyles((theme) => ({
     app: {
@@ -29,6 +27,7 @@ const useStyles = makeStyles((theme) => ({
 export const Routes = () => {
     const classes = useStyles();
     const history = useHistory();
+    const authContext = useContext(AuthContext);
 
     return (
         <Switch>
@@ -44,14 +43,12 @@ export const Routes = () => {
                     <Route
                         path="/logout"
                         render={() => {
-                            logout();
+                            logout(authContext);
                             history.push('/');
                             return null;
                         }}
                     />
                     <PrivateRoute path="/protected" component={Protected}/>
-                    <PrivateRoute path="/map" component={NSMap}/>
-                    <PrivateRoute path="/map2" component={NSDashboard}/>
                     <Route exact path="/" component={Home}/>
                 </header>
             </div>

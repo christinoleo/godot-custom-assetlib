@@ -4,11 +4,10 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from core.auth import auth_utils
+from core.auth import auth_utils, user_session
 from fastapi_crud_orm_connector.api import security
-from fastapi_crud_orm_connector.utils.rdb_session import get_rdb
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 90
+ACCESS_TOKEN_EXPIRE_MINUTES = 300
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = "HS256"
 
@@ -17,7 +16,7 @@ auth_router = r = APIRouter()
 
 @r.post("/token")
 async def login(
-        db=Depends(get_rdb), form_data: OAuth2PasswordRequestForm = Depends()
+        db=Depends(user_session.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ):
     user = auth_utils.authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -44,7 +43,7 @@ async def login(
 
 @r.post("/signup")
 async def signup(
-        db=Depends(get_rdb), form_data: OAuth2PasswordRequestForm = Depends()
+        db=Depends(user_session.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ):
     user = auth_utils.sign_up_new_user(db, form_data.username, form_data.password)
     if not user:

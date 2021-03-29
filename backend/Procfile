@@ -1,0 +1,1 @@
+web: uvicorn main:app --workers 1 --app-dir /app/app --port 5000 --host 0.0.0.0

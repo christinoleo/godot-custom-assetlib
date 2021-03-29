@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Button, Checkbox, FormControlLabel, Grid, Paper, TextField, } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { Face, Fingerprint } from '@material-ui/icons';
@@ -6,7 +6,7 @@ import { Alert } from '@material-ui/lab';
 import { Redirect } from 'react-router-dom';
 import { useHistory } from 'react-router';
 
-import { isAuthenticated, login } from '../utils/auth';
+import { AuthContext, login } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
     margin: {
@@ -29,14 +29,15 @@ export const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const authContext = useContext(AuthContext);
 
     const handleSubmit = async (_) => {
         setError('');
         try {
-            const data = await login(email, password);
+            const data = await login(email, password, authContext);
 
             if (data) {
-                history.push('/');
+                history.push('/map');
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -49,7 +50,7 @@ export const Login = () => {
         }
     };
 
-    return !!isAuthenticated() ? (
+    return !!authContext.isAuthenticated() ? (
         <Redirect to="/"/>
     ) : (
         <Paper className={classes.padding}>

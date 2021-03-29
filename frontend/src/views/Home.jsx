@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { getMessage, isAuthenticated } from '../utils';
+import { AuthContext, getMessage } from '../utils';
 
 const useStyles = makeStyles((theme) => ({
     link: {
@@ -13,6 +13,7 @@ export const Home = () => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const classes = useStyles();
+    const authContext = useContext(AuthContext);
 
     const queryBackend = async () => {
         try {
@@ -49,10 +50,7 @@ export const Home = () => {
             <a className={classes.link} href="/map">
                 Map
             </a>
-            <a className={classes.link} href="/map2">
-                Map2
-            </a>
-            {!!isAuthenticated() ? (
+            {!!authContext.isAuthenticated() ? (
                 <a className={classes.link} href="/logout">
                     Logout
                 </a>

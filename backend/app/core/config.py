@@ -1,6 +1,6 @@
 import os
 
-PROJECT_NAME = "fastapi-react-project"
+PROJECT_NAME = "godot-asset-marketplace"
 
 SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
 
