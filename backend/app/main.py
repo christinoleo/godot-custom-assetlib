@@ -1,6 +1,7 @@
 from pathlib import Path  # Python 3.6+ only
 
-import uvicorn, os
+import os
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
@@ -12,7 +13,7 @@ from starlette.responses import JSONResponse, HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
-env_path = Path(__file__).parent.parent / 'local_storage' / 'dot.env'
+env_path = Path(__file__).absolute().parent.parent / 'local_storage' / 'dot.env'
 load_dotenv(dotenv_path=env_path)
 
 from api.v1.base import generate_routers
@@ -54,20 +55,22 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-appdirprefix = ''
-if os.getenv('STAGE', 'dev').startswith('prod'):
-    appdirprefix = os.getcwd() + '/app/'
-app.mount("/static", StaticFiles(directory=appdirprefix+'frontend/static'), name="static")
-templates = Jinja2Templates(directory=appdirprefix+'frontend')
+try:
+    appdirprefix = ''
+    if os.getenv('STAGE', 'dev').startswith('prod'):
+        appdirprefix = os.getcwd() + '/app/'
+    app.mount("/static", StaticFiles(directory=appdirprefix + 'frontend/static'), name="static")
+    templates = Jinja2Templates(directory=appdirprefix + 'frontend')
 
 
-@app.get("/", response_class=HTMLResponse, tags=["static website"])
-@app.get("/admin", response_class=HTMLResponse, tags=["static website"])
-@app.get("/login", response_class=HTMLResponse, tags=["static website"])
-@app.get("/logout", response_class=HTMLResponse, tags=["static website"])
-@app.get("/signup", response_class=HTMLResponse, tags=["static website"])
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
+    @app.get("/", response_class=HTMLResponse, tags=["static website"])
+    @app.get("/admin", response_class=HTMLResponse, tags=["static website"])
+    @app.get("/login", response_class=HTMLResponse, tags=["static website"])
+    @app.get("/logout", response_class=HTMLResponse, tags=["static website"])
+    @app.get("/signup", response_class=HTMLResponse, tags=["static website"])
+    async def index(request: Request):
+        return templates.TemplateResponse("index.html", {"request": request})
+except Exception as e:
+    print('Unable to load static website from backend. Maybe nothing is there?', e)
 
 generate_routers(app)
